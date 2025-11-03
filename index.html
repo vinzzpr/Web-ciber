@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Kontrol Real Time</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: black url('walpaper.jpg') center/cover no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    transition: background 0.5s ease-in-out;
+    font-family: Arial, sans-serif;
+  }
+
+  button {
+    width: 200px;
+    height: 60px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(45deg, #00b4d8, #0077b6);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s, background 0.3s;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #48cae4, #0096c7);
+  }
+
+  .on {
+    background: linear-gradient(45deg, #00ff88, #06d6a0);
+  }
+</style>
+</head>
+<body>
+
+<button id="flashBtn">🔦 Nyalakan Senter</button>
+<button id="wallpaperBtn">🖼️ Ganti Wallpaper</button>
+<button id="musicBtn">🎵 Putar Musik</button>
+
+<audio id="player" src="audio.mp4"></audio>
+
+<script>
+let stream = null;
+let track = null;
+let flashlightOn = false;
+
+// Tombol SENTER
+const flashBtn = document.getElementById('flashBtn');
+flashBtn.addEventListener('click', async () => {
+  try {
+    if (!flashlightOn) {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      track = stream.getVideoTracks()[0];
+      await track.applyConstraints({ advanced: [{ torch: true }] });
+      flashBtn.textContent = '💡 Matikan Senter';
+      flashBtn.classList.add('on');
+      flashlightOn = true;
+    } else {
+      await track.applyConstraints({ advanced: [{ torch: false }] });
+      track.stop();
+      flashBtn.textContent = '🔦 Nyalakan Senter';
+      flashBtn.classList.remove('on');
+      flashlightOn = false;
+    }
+  } catch (err) {
+    alert('Perangkat tidak mendukung senter atau akses kamera diblokir!');
+    console.error(err);
+  }
+});
+
+// Tombol GANTI WALLPAPER
+const wallpaperBtn = document.getElementById('wallpaperBtn');
+wallpaperBtn.addEventListener('click', () => {
+  document.body.style.backgroundImage = "url('walpaper.jpg')";
+  wallpaperBtn.textContent = '✅ Wallpaper Diganti';
+  setTimeout(() => wallpaperBtn.textContent = '🖼️ Ganti Wallpaper', 2000);
+});
+
+// Tombol PUTAR MUSIK
+const musicBtn = document.getElementById('musicBtn');
+const player = document.getElementById('player');
+let musicPlaying = false;
+
+musicBtn.addEventListener('click', () => {
+  if (!musicPlaying) {
+    player.play();
+    musicBtn.textContent = '⏸️ Hentikan Musik';
+    musicBtn.classList.add('on');
+    musicPlaying = true;
+  } else {
+    player.pause();
+    player.currentTime = 0;
+    musicBtn.textContent = '🎵 Putar Musik';
+    musicBtn.classList.remove('on');
+    musicPlaying = false;
+  }
+});
+</script>
+
+</body>
+</html>
